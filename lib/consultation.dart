@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tp1/drawer.dart';
 import 'package:tp1/lib_http.dart';
 import 'package:tp1/task.dart';
@@ -10,7 +13,6 @@ class Consultation extends StatefulWidget {
   _ConsultationState createState() => _ConsultationState();
   Consultation({required this.taskID});
 
-
 }
 
 
@@ -19,6 +21,7 @@ class _ConsultationState extends State<Consultation> {
   final _nom = TextEditingController();
   final _date = TextEditingController();
   final _completion = TextEditingController();
+  String imagePath = "";
 
   TaskDetailResponse t = new TaskDetailResponse();
   void getInfos() async {
@@ -33,6 +36,13 @@ class _ConsultationState extends State<Consultation> {
     }catch(e){
       print(e);
     }
+  }
+
+  void getImage() async {
+    ImagePicker picker = ImagePicker();
+    var pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    imagePath = pickedImage!.path;
+    setState(() {});
   }
 
 
@@ -59,6 +69,13 @@ class _ConsultationState extends State<Consultation> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                SizedBox(
+                  width: 150,
+                  height: 150,
+                  child:  imagePath!=""?Image.file(File(imagePath)):Text("Pas d'image"),
+                ),
+                SizedBox(height: 20),
+                
                 TextFormField(
                     controller: _nom,
                     enabled: false,
@@ -141,7 +158,14 @@ class _ConsultationState extends State<Consultation> {
               ],
             ),
           ),
+
       ),
+      floatingActionButton: imagePath==""?
+      FloatingActionButton(
+          onPressed: getImage,
+        child: const Icon(Icons.image),
+      ):
+      Text(""),
     );
   }
 }
