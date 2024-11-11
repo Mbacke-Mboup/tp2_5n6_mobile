@@ -21,7 +21,7 @@ class _ConsultationState extends State<Consultation> {
   final _nom = TextEditingController();
   final _date = TextEditingController();
   final _completion = TextEditingController();
-  String imagePath = "";
+  String imageUrl = "";
 
   TaskDetailResponse t = new TaskDetailResponse();
   void getInfos() async {
@@ -31,6 +31,7 @@ class _ConsultationState extends State<Consultation> {
       _nom.text = t.name;
       _date.text = t.deadline.toString();
       _completion.text = t.percentageTimeSpent.toString().split(" ")[0] + "%";
+
       setState((){
       });
     }catch(e){
@@ -41,7 +42,7 @@ class _ConsultationState extends State<Consultation> {
   void getImage() async {
     ImagePicker picker = ImagePicker();
     var pickedImage = await picker.pickImage(source: ImageSource.gallery);
-    imagePath = pickedImage!.path;
+    imageUrl = await sendImage(pickedImage!.path, pickedImage!.name, t.id);
     setState(() {});
   }
 
@@ -72,7 +73,7 @@ class _ConsultationState extends State<Consultation> {
                 SizedBox(
                   width: 150,
                   height: 150,
-                  child:  imagePath!=""?Image.file(File(imagePath)):Text("Pas d'image"),
+                  child:  imageUrl!=""?Image.network(imageUrl):Text("Pas d'image"),
                 ),
                 SizedBox(height: 20),
                 
@@ -160,7 +161,7 @@ class _ConsultationState extends State<Consultation> {
           ),
 
       ),
-      floatingActionButton: imagePath==""?
+      floatingActionButton: imageUrl==""?
       FloatingActionButton(
           onPressed: getImage,
         child: const Icon(Icons.image),

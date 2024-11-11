@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:dio/dio.dart';
 
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -70,6 +72,23 @@ Future<List<HomeItemResponse>> getTasks() async {
     print(tasks);
     return tasks;
   } catch (e) {
+    print(e);
+    rethrow;
+  }
+}
+
+Future<String> sendImage(String filePath, String fileName, int taskId) async{
+  try{
+
+    FormData formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath,filename:  fileName),
+      'taskID' : taskId
+    });
+ var response = await SingletonDio.getDio().post(SingletonDio.server +'file', data: formData);
+ String idImage = response.toString();
+ var result = SingletonDio.server+"file/"+idImage;
+  return result;
+  }catch(e) {
     print(e);
     rethrow;
   }
