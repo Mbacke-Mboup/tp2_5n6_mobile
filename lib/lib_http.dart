@@ -96,12 +96,20 @@ Future<String> sendImage(String filePath, String fileName, int taskId) async{
   }
 }
 
-void addTask(AddTaskRequest req) async {
+Future<void> addTask(AddTaskRequest req) async {
   try {
     await SingletonDio.getDio()
         .post(SingletonDio.server + 'api/add', data: req.toJson());
   } catch (e) {
     print(e);
+    rethrow;
+  }
+}
+
+Future<void> removeTask(int taskId) async {
+  try{
+    await SingletonDio.getDio().delete(SingletonDio.server+"api/delete/${taskId}");
+  }catch(e){
     rethrow;
   }
 }

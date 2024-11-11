@@ -50,6 +50,15 @@ class _ConsultationState extends State<Consultation> {
     setState(() {});
   }
 
+  void delete() async {
+    try{
+      await removeTask(t.id);
+      Navigator.popAndPushNamed(context, "/acceuil");
+    }catch(e){
+      print(e);
+    }
+}
+
 
 
 
@@ -142,22 +151,41 @@ class _ConsultationState extends State<Consultation> {
                   )
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                    onPressed: () async {
-                      if(t.percentageDone != int.parse(_pourcentage.value.text)){
-                        try{
-                          changeProgress(t.id, int.parse(_pourcentage.value.text));
-                          Navigator.popAndPushNamed(context, "/acceuil");
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                        child: ElevatedButton(
+                            onPressed: () async {
+                              if(t.percentageDone != int.parse(_pourcentage.value.text)){
+                                try{
+                                  changeProgress(t.id, int.parse(_pourcentage.value.text));
+                                  Navigator.popAndPushNamed(context, "/acceuil");
 
-                        }catch(e){
+                                }catch(e){
 
-                        }
-                      }else{
-                        Navigator.popAndPushNamed(context, "/acceuil");
-                      }
-                    },
-                    child:Text("Sauveguarder")
+                                }
+                              }else{
+                                Navigator.popAndPushNamed(context, "/acceuil");
+                              }
+                            },
+                            child:Text("Sauveguarder")
+                        )
+
+                    ),
+
+                    Expanded(
+                        flex: 1,
+                        child: ElevatedButton(
+                            onPressed: delete,
+                            style: ButtonStyle(backgroundColor: WidgetStateProperty.all(Colors.red)),
+                            child:Icon(Icons.delete)
+                        )
+
+                    )
+                  ],
                 )
+
 
               ],
             ),

@@ -16,7 +16,7 @@ class _AccueilState extends State<Accueil> {
   final _motdePasse = TextEditingController();
   String imagePlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQpZaeWxczipxrTdSIThz5hmwrRYhEeeAl5A&s";
   List<HomeItemPhotoResponse> tasks = [];
-  void getTask() async {
+  getTask() async {
     try{
       tasks =  await getTasks();
       setState(() {
@@ -29,7 +29,7 @@ class _AccueilState extends State<Accueil> {
   @override
   void initState() {
     super.initState();
-    getTask();
+     getTask();
   }
 
   @override

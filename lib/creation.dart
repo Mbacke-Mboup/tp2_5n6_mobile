@@ -61,12 +61,12 @@ class _CreationState extends State<Creation> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                  onPressed: ()async {
+                  onPressed: () async {
                     try{
                       AddTaskRequest req = new AddTaskRequest();
                       req.name = _taskName.text;
                       req.deadline = DateTime.parse(_selectedDate);
-                      addTask(req);
+                      await addTask(req);
                     }catch(e){
                       print(e);
                     }
