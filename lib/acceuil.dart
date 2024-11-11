@@ -6,12 +6,13 @@ import 'package:tp1/transfer.dart';
 
 class Accueil extends StatefulWidget {
   const Accueil({super.key});
-
   @override
   State<Accueil> createState() => _AccueilState();
 }
 
 class _AccueilState extends State<Accueil> {
+  bool _isLoading = true;
+
   final TextEditingController _name = TextEditingController();
   final _motdePasse = TextEditingController();
   String imagePlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQpZaeWxczipxrTdSIThz5hmwrRYhEeeAl5A&s";
@@ -19,6 +20,7 @@ class _AccueilState extends State<Accueil> {
   getTask() async {
     try{
       tasks =  await getTasks();
+      _isLoading = false;
       setState(() {
       });
     }catch(e){
@@ -42,7 +44,14 @@ class _AccueilState extends State<Accueil> {
         title: Text("Accueil"),
       ),
       drawer: TNav(),
-      body: Center(
+      body: _isLoading?  Center(
+        child: Container(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+          ),
+        ),
+      )
+          :  Center(
         child: Stack(
           children: [
             Container(

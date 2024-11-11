@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tp1/lib_http.dart';
 import 'package:tp1/transfer.dart';
 
@@ -20,10 +21,38 @@ void getHttp() async {
 }
 
 class _ConnexionState extends State<Connexion> {
-
+  bool _isLoading = true;
   final TextEditingController _name = TextEditingController();
   final _motdePasse = TextEditingController();
+  late SharedPreferences _prefs;
+  @override
+  void initState() {
+    SharedPreferences.getInstance().then((onValue) {
+      _prefs = onValue;
+      _getUser();
+    });
 
+    super.initState();
+  }
+
+   _getUser() async {
+    SigninRequest req = new SigninRequest();
+    req.username = _prefs.getString('name') ?? '';
+    req.password = _prefs.getString('password') ?? '';
+    if(req.username==''&& req.password == ''){
+      _isLoading = false;
+      setState(() {
+      });
+      return;
+    }
+    await signin(req);
+    Navigator.popAndPushNamed(context, "/acceuil");
+  }
+
+  _setUser(SigninRequest req){
+    _prefs.setString('name', req.username);
+    _prefs.setString('password', req.password);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +64,14 @@ class _ConnexionState extends State<Connexion> {
 
         title: Text("Connexion"),
       ),
-      body: Center(
+      body: _isLoading?  Center(
+        child: Container(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+          ),
+        ),
+      )
+          : Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
 
@@ -62,12 +98,20 @@ class _ConnexionState extends State<Connexion> {
                 ElevatedButton(
                     onPressed: () async {
                       try{
+                        _isLoading = true;
+                        setState(() {
+                        });
                         SigninRequest req = new SigninRequest();
                         req.username = _name.text;
                         req.password = _motdePasse.text;
                         await signin(req);
+                        _setUser(req);
                         Navigator.popAndPushNamed(context, "/acceuil");
                       }on DioException catch(e){
+                        _isLoading = false;
+                        setState(() {
+
+                        });
                         String message = e.response!.data;
                         if (message == "BadCredentialsException") {
                           ScaffoldMessenger.of(context)

@@ -17,7 +17,7 @@ class _InscriptionState extends State<Inscription> {
   final TextEditingController _name = TextEditingController();
   final _motdePasse = TextEditingController();
   final _confirmMotdePasse = TextEditingController();
-
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,14 @@ class _InscriptionState extends State<Inscription> {
 
         title: Text("Inscription"),
       ),
-      body: Center(
+      body:  _isLoading?  Center(
+        child: Container(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+          ),
+        ),
+      )
+          :  Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
 
@@ -67,12 +74,18 @@ class _InscriptionState extends State<Inscription> {
                             .showSnackBar(const SnackBar(content: Text('Les mots de passes ne correspondent pas.')));
                       }else{
                         try{
+                          setState(() {
+                            _isLoading = true;
+                          });
                           SignupRequest req = new SignupRequest();
                           req.username = _name.text;
                           req.password = _motdePasse.text;
                           await signup(req);
                           Navigator.pushNamed(context, "/acceuil");
                         }on DioException catch(e){
+                          setState(() {
+                            _isLoading = false;
+                          });
                           String message = e.response!.data;
                           if (message == "UsernameTooShort") {
                             ScaffoldMessenger.of(context)

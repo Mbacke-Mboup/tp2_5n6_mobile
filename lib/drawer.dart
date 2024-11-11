@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tp1/lib_http.dart';
 
 class TNav extends StatelessWidget {
   static String name = "";
+  late SharedPreferences _prefs;
+
+
+
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -42,6 +48,11 @@ class TNav extends StatelessWidget {
             leading: Icon(Icons.door_back_door),
             title: Text('Déconnexion'),
             onTap: () {
+              SharedPreferences.getInstance().then((onValue) {
+                _prefs = onValue;
+                _prefs.remove('name');
+                _prefs.remove('password');
+              });
               Navigator.pop(context);
               try{
                 signout();
