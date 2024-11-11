@@ -23,7 +23,7 @@ class _ConsultationState extends State<Consultation> {
   final _completion = TextEditingController();
   String imageUrl = "";
 
-  TaskDetailResponse t = new TaskDetailResponse();
+  TaskDetailPhotoResponse t = new TaskDetailPhotoResponse();
   void getInfos() async {
     try {
       t = await taskDetails(widget.taskID);
@@ -31,7 +31,9 @@ class _ConsultationState extends State<Consultation> {
       _nom.text = t.name;
       _date.text = t.deadline.toString();
       _completion.text = t.percentageTimeSpent.toString().split(" ")[0] + "%";
-
+      if(t.photoId!=0){
+        imageUrl = SingletonDio.image+t.photoId.toString();
+      }
       setState((){
       });
     }catch(e){
@@ -42,7 +44,9 @@ class _ConsultationState extends State<Consultation> {
   void getImage() async {
     ImagePicker picker = ImagePicker();
     var pickedImage = await picker.pickImage(source: ImageSource.gallery);
-    imageUrl = await sendImage(pickedImage!.path, pickedImage!.name, t.id);
+    if(pickedImage!= null){
+      imageUrl = await sendImage(pickedImage!.path, pickedImage!.name, t.id);
+    }
     setState(() {});
   }
 
@@ -76,7 +80,6 @@ class _ConsultationState extends State<Consultation> {
                   child:  imageUrl!=""?Image.network(imageUrl):Text("Pas d'image"),
                 ),
                 SizedBox(height: 20),
-                
                 TextFormField(
                     controller: _nom,
                     enabled: false,
@@ -161,12 +164,11 @@ class _ConsultationState extends State<Consultation> {
           ),
 
       ),
-      floatingActionButton: imageUrl==""?
+      floatingActionButton:
       FloatingActionButton(
           onPressed: getImage,
         child: const Icon(Icons.image),
-      ):
-      Text(""),
+      )
     );
   }
 }

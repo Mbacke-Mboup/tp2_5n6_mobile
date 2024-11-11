@@ -14,7 +14,8 @@ class Accueil extends StatefulWidget {
 class _AccueilState extends State<Accueil> {
   final TextEditingController _name = TextEditingController();
   final _motdePasse = TextEditingController();
-  List<HomeItemResponse> tasks = [];
+  String imagePlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQpZaeWxczipxrTdSIThz5hmwrRYhEeeAl5A&s";
+  List<HomeItemPhotoResponse> tasks = [];
   void getTask() async {
     try{
       tasks =  await getTasks();
@@ -23,6 +24,7 @@ class _AccueilState extends State<Accueil> {
     }catch(e){
       print(e);
     }
+
   }
   @override
   void initState() {
@@ -49,8 +51,18 @@ class _AccueilState extends State<Accueil> {
                 itemBuilder: (context, index) {
                   return ListTile(
                     title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+
                       children: [
                         Expanded(
+                          flex: 1,
+                          child: tasks[index].photoId!=0? Image.network(SingletonDio.image+tasks[index].photoId.toString()):Image.network(imagePlaceholder),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Expanded(
+                          flex: 4,
                           child: Text(tasks[index].name),
                         ),
                         PopupMenuButton<String>(

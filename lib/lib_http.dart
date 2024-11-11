@@ -19,6 +19,7 @@ class SingletonDio {
   }
 
   static String server = "http://10.0.2.2:8080/";
+  static String image = "http://10.0.2.2:8080/file/";
 }
 
 Future<SigninResponse> signup(SignupRequest req) async {
@@ -49,6 +50,7 @@ Future<SigninResponse> signin(SigninRequest req) async {
   }
 }
 
+
 void signout() async {
   try {
     await SingletonDio.getDio()
@@ -59,15 +61,15 @@ void signout() async {
   }
 }
 
-Future<List<HomeItemResponse>> getTasks() async {
+Future<List<HomeItemPhotoResponse>> getTasks() async {
   try {
     var response = await SingletonDio.getDio()
-        .get(SingletonDio.server + 'api/home');
+        .get(SingletonDio.server + 'api/home/photo');
     print(response);
     var rawTasks = response.data as List;
-    List<HomeItemResponse> tasks = [];
+    List<HomeItemPhotoResponse> tasks = [];
     tasks = rawTasks.map((task){
-      return HomeItemResponse.fromJson(task);
+      return HomeItemPhotoResponse.fromJson(task);
     }).toList();
     print(tasks);
     return tasks;
@@ -86,7 +88,7 @@ Future<String> sendImage(String filePath, String fileName, int taskId) async{
     });
  var response = await SingletonDio.getDio().post(SingletonDio.server +'file', data: formData);
  String idImage = response.toString();
- var result = SingletonDio.server+"file/"+idImage;
+ var result = SingletonDio.image+idImage;
   return result;
   }catch(e) {
     print(e);
@@ -104,11 +106,11 @@ void addTask(AddTaskRequest req) async {
   }
 }
 
-Future<TaskDetailResponse> taskDetails(int id) async {
+Future<TaskDetailPhotoResponse> taskDetails(int id) async {
   try {
     var response = await SingletonDio.getDio()
-        .get(SingletonDio.server + 'api/detail/${id}');
-    return TaskDetailResponse.fromJson(response.data);
+        .get(SingletonDio.server + 'api/detail/photo/${id}');
+    return TaskDetailPhotoResponse.fromJson(response.data);
   } catch (e) {
     print(e);
     rethrow;
