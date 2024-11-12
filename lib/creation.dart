@@ -36,44 +36,46 @@ class _CreationState extends State<Creation> {
         title: Text(S.current.creation_title),
       ),
       drawer: TNav(),
-      body: Container(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              TextField(
-                controller: _taskName,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: S.current.task_name_label,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextField(
+                  controller: _taskName,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: S.current.task_name_label,
+                  ),
                 ),
-              ),
-              SizedBox(height: 20),
-              Text(
-                '${S.current.deadline_label}: ${_selectedDate.split(" ")[0]}',
-                style: TextStyle(fontSize: 20),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => _selectDate(context),
-                child: Text(S.current.select_date_button),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () async {
-                  try {
-                    AddTaskRequest req = AddTaskRequest();
-                    req.name = _taskName.text;
-                    req.deadline = DateTime.parse(_selectedDate);
-                    await addTask(req);
-                  } catch (e) {
-                    print(e);
-                  }
-                  Navigator.popAndPushNamed(context, "/acceuil");
-                },
-                child: Text(S.current.create_task_button),
-              )
-            ],
+                SizedBox(height: 20),
+                Text(
+                  '${S.current.deadline_label}: ${_selectedDate.split(" ")[0]}',
+                  style: TextStyle(fontSize: 20),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => _selectDate(context),
+                  child: Text(S.current.select_date_button),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      AddTaskRequest req = AddTaskRequest();
+                      req.name = _taskName.text;
+                      req.deadline = DateTime.parse(_selectedDate);
+                      await addTask(req);
+                    } catch (e) {
+                      print(e);
+                    }
+                    Navigator.popAndPushNamed(context, "/acceuil");
+                  },
+                  child: Text(S.current.create_task_button),
+                )
+              ],
+            ),
           ),
         ),
       ),

@@ -58,7 +58,7 @@ class TNav extends StatelessWidget {
                     try {
                       signout();
                       name = "";
-                      Navigator.popAndPushNamed(context, "/");
+                      Navigator.pushReplacementNamed(context, "/");
                     } catch (e) {
                       print(e);
                     }

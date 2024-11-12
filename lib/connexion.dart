@@ -63,70 +63,74 @@ class _ConnexionState extends State<Connexion> {
         ),
       )
           : Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _name,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: S.current.name_label,
-              ),
-            ),
-            TextField(
-              controller: _motdePasse,
-              obscureText: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: S.current.password_label,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            child: SingleChildScrollView(
+              child: Center(
+                      child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      SigninRequest req = SigninRequest();
-                      req.username = _name.text;
-                      req.password = _motdePasse.text;
-                      await signin(req);
-                      _setUser(req);
-                      Navigator.popAndPushNamed(context, "/acceuil");
-                    } on DioException catch (e) {
-                      setState(() {
-                        _isLoading = false;
-                      });
-                      String message = e.response!.data;
-                      if (message == "BadCredentialsException") {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.current.invalid_credentials)),
-                        );
-                      } else if (message == "InternalAuthenticationServiceException") {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.current.account_not_exist)),
-                        );
-                      } else {
-                        print(e);
-                      }
-                    }
-                  },
-                  child: Text(S.current.login_button),
+                TextField(
+                  controller: _name,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: S.current.name_label,
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/inscription");
-                  },
-                  child: Text(S.current.signup_button),
+                TextField(
+                  controller: _motdePasse,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: S.current.password_label,
+                  ),
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          SigninRequest req = SigninRequest();
+                          req.username = _name.text;
+                          req.password = _motdePasse.text;
+                          await signin(req);
+                          _setUser(req);
+                          Navigator.popAndPushNamed(context, "/acceuil");
+                        } on DioException catch (e) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          String message = e.response!.data;
+                          if (message == "BadCredentialsException") {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(S.current.invalid_credentials)),
+                            );
+                          } else if (message == "InternalAuthenticationServiceException") {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(S.current.account_not_exist)),
+                            );
+                          } else {
+                            print(e);
+                          }
+                        }
+                      },
+                      child: Text(S.current.login_button),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, "/inscription");
+                      },
+                      child: Text(S.current.signup_button),
+                    ),
+                  ],
+                )
               ],
-            )
-          ],
-        ),
-      ),
+                      ),
+                    ),
+            ),
+          ),
     );
   }
 }
