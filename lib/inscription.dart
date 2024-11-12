@@ -115,6 +115,8 @@ class _InscriptionState extends State<Inscription> {
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(const SnackBar(content: Text("Ce nom est déja pris")));
                           } else{
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(content: Text("Une erreur réseau s'est produite. Veuillez réessayez plus tard!")));
                             print(e);
                           }
                         }

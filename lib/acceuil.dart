@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:tp1/drawer.dart';
 import 'package:tp1/lib_http.dart';
@@ -30,7 +31,18 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
       _isLoading = false;
       setState(() {
       });
-    }catch(e){
+    }on DioException catch(e){
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Une erreur réseau s'est produite. Veuillez réessayez!"),
+          duration: Duration(days: 1),
+          backgroundColor: Colors.deepPurpleAccent,
+          action: SnackBarAction(
+            label: 'Rafrachir',
+            onPressed: refresh
+          ),
+        ),
+      );
       print(e);
     }
 
@@ -77,17 +89,13 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
         child: Stack(
           children: [
             Container(
-              child: Column(
-                children: [
-                  Expanded(
-                    flex:9,
-                    child: ListView.builder(
+              child: ListView.builder(
                       itemCount: tasks.length,
                       itemBuilder: (context, index) {
                         return ListTile(
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                    
+
                             children: [
                               Expanded(
                                 flex: 1,
@@ -129,42 +137,7 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
                         );
                       },
                     ),
-                  ),Expanded(
-                    flex: 1,
-                    child: ElevatedButton(
-                      onPressed: refresh,
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(Colors.deepPurpleAccent),
-                        padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0)),
-                        shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        )),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.refresh,
-                            size: 24.0,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            "Rafrachir",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-
-                ],
-              ),
-            ),
+                  ),
             Align(
                 alignment: Alignment.bottomRight,
                 child: Padding(
