@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tp1/drawer.dart';
@@ -16,7 +17,8 @@ class Consultation extends StatefulWidget {
 }
 
 
-class _ConsultationState extends State<Consultation> {
+class _ConsultationState extends State<Consultation> with WidgetsBindingObserver {
+  bool _isLoading = true;
   final _pourcentage = TextEditingController();
   final _nom = TextEditingController();
   final _date = TextEditingController();
@@ -34,10 +36,27 @@ class _ConsultationState extends State<Consultation> {
       if(t.photoId!=0){
         imageUrl = SingletonDio.image+t.photoId.toString();
       }
+      _isLoading = false;
       setState((){
       });
     }catch(e){
       print(e);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        _isLoading = true;
+      });
+      getInfos();
     }
   }
 
@@ -65,9 +84,9 @@ class _ConsultationState extends State<Consultation> {
   @override
   void initState() {
     getInfos();
+    WidgetsBinding.instance.addObserver(this);
+
     super.initState();
-
-
   }
 
   @override
@@ -77,7 +96,13 @@ class _ConsultationState extends State<Consultation> {
         title: Text('Consultation'),
       ),
       drawer: TNav(),
-      body: Container(
+      body: _isLoading? Center(
+        child: Container(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+          ),
+        ),
+      ) : Container(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -86,7 +111,11 @@ class _ConsultationState extends State<Consultation> {
                 SizedBox(
                   width: 150,
                   height: 150,
-                  child:  imageUrl!=""?Image.network(imageUrl):Text("Pas d'image"),
+                  child:  imageUrl!=""?CachedNetworkImage(
+                    imageUrl: SingletonDio.image+t.photoId.toString(),
+                    placeholder: (context, url) => new CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => new Icon(Icons.error),
+                  ):Text("Pas d'image"),
                 ),
                 SizedBox(height: 20),
                 TextFormField(

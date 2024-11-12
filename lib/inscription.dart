@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tp1/lib_http.dart';
 import 'package:tp1/transfer.dart';
 
@@ -18,6 +19,22 @@ class _InscriptionState extends State<Inscription> {
   final _motdePasse = TextEditingController();
   final _confirmMotdePasse = TextEditingController();
   bool _isLoading = false;
+  late SharedPreferences _prefs;
+
+  @override
+  @override
+  void initState() {
+    SharedPreferences.getInstance().then((onValue) {
+      _prefs = onValue;
+    });
+    super.initState();
+  }
+
+
+  _setUser(SignupRequest req){
+    _prefs.setString('name', req.username);
+    _prefs.setString('password', req.password);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +98,7 @@ class _InscriptionState extends State<Inscription> {
                           req.username = _name.text;
                           req.password = _motdePasse.text;
                           await signup(req);
+                          _setUser(req);
                           Navigator.pushNamed(context, "/acceuil");
                         }on DioException catch(e){
                           setState(() {

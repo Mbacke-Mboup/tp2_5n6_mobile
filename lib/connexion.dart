@@ -49,7 +49,7 @@ class _ConnexionState extends State<Connexion> {
     Navigator.popAndPushNamed(context, "/acceuil");
   }
 
-  _setUser(SigninRequest req){
+   _setUser(SigninRequest req){
     _prefs.setString('name', req.username);
     _prefs.setString('password', req.password);
   }
