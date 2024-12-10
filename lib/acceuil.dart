@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tp1/drawer.dart';
 import 'package:tp1/lib_http.dart';
@@ -15,9 +17,9 @@ class Accueil extends StatefulWidget {
 }
 
 class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
-  bool _isLoading = true;
+  bool _isLoading = false;
   String imagePlaceholder = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQpZaeWxczipxrTdSIThz5hmwrRYhEeeAl5A&s";
-  List<HomeItemPhotoResponse> tasks = [];
+  late var tasks;
 
   refresh() {
     setState(() {
@@ -27,22 +29,20 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
   }
 
   getTask() async {
+    User? user = FirebaseAuth.instance.currentUser;
     try {
-      tasks = await getTasks();
+      var result = await FirebaseFirestore.instance.collection("users")
+      .doc(user!.uid)
+      .collection("tasks").withConverter<HomeItemPhotoResponse>(
+        fromFirestore:(snapshot, _) => HomeItemPhotoResponse.fromJson(snapshot.data()!),
+        toFirestore: (task,_) => task.toJson(),
+      ).get();
+
+      tasks = result.docs;
+
       _isLoading = false;
       setState(() {});
-    } on DioException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(S.current.network_error),
-          duration: Duration(days: 1),
-          backgroundColor: Colors.deepPurpleAccent,
-          action: SnackBarAction(
-            label: 'Rafraîchir',
-            onPressed: refresh,
-          ),
-        ),
-      );
+    } catch (e) {
       print(e);
     }
   }
@@ -50,8 +50,8 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     getTask();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -84,42 +84,41 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
           : Center(
         child: Stack(
           children: [
-            ListView.builder(
-              itemCount: tasks.length,
-              itemBuilder: (context, index) {
-                return ListTile(
+            ListView(
+                children: tasks.map<Widget>((t) =>  ListTile(
                   title: Row(
+
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: tasks[index].photoId != 0
-                            ? CachedNetworkImage(
-                          imageUrl:
-                          SingletonDio.image + tasks[index].photoId.toString(),
-                          placeholder: (context, url) => CircularProgressIndicator(),
-                          errorWidget: (context, url, error) => Icon(Icons.error),
-                        )
-                            : CachedNetworkImage(
-                          imageUrl: imagePlaceholder,
-                          placeholder: (context, url) => CircularProgressIndicator(),
-                        ),
-                      ),
-                      SizedBox(width: 10),
+                      // Expanded(
+                      //   flex: 1,
+                      //   child: tasks[index].photoId != 0
+                      //       ? CachedNetworkImage(
+                      //     imageUrl:
+                      //     SingletonDio.image + tasks[index].photoId.toString(),
+                      //     placeholder: (context, url) => CircularProgressIndicator(),
+                      //     errorWidget: (context, url, error) => Icon(Icons.error),
+                      //   )
+                      //       : CachedNetworkImage(
+                      //     imageUrl: imagePlaceholder,
+                      //     placeholder: (context, url) => CircularProgressIndicator(),
+                      //   ),
+                      // ),
+                      // SizedBox(width: 10),
                       Expanded(
                         flex: 4,
-                        child: Text(tasks[index].name),
+                        child: Text(t.data().nom),
                       ),
                       PopupMenuButton<String>(
                         itemBuilder: (context) => [
                           PopupMenuItem<String>(
-                            child: Text(S.current.task_percentage + ' ${tasks[index].percentageDone}'),
+                            child: Text(S.current.task_percentage + ' ${t.data().pourcentage}'),
                           ),
                           PopupMenuItem<String>(
-                            child: Text(S.current.time_spent_task + ' ${tasks[index].percentageDone}'),
+                            child: Text(S.current.time_spent_task + ' ${t.data().pourcentage}'),
                           ),
                           PopupMenuItem<String>(
-                            child: Text(S.current.deadline_task + ' ${tasks[index].deadline.toString().split(" ")[0]}'),
+                            child: Text(S.current.deadline_task + ' ${t.data().creation_date}'),
                           ),
                         ],
                         icon: Icon(Icons.more_vert),
@@ -127,10 +126,10 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
                     ],
                   ),
                   onTap: () {
-                    Navigator.pushNamed(context, "/consultation", arguments: tasks[index].id);
+                    Navigator.pushNamed(context, "/consultation", arguments: t.data().nom);
                   },
-                );
-              },
+                )).toList(),
+
             ),
             Align(
               alignment: Alignment.bottomRight,

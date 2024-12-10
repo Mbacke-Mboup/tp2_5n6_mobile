@@ -54,13 +54,15 @@ class AddTaskRequest {
 
 @JsonSerializable()
 class HomeItemPhotoResponse {
-  HomeItemPhotoResponse();
-  int id = 0;
-  String name = "";
-  int percentageDone = 0;
-  double percentageTimeSpent = 0;
-  DateTime deadline = DateTime.now();
-  int? photoId = 0;
+
+  String nom = "";
+  int pourcentage = 0;
+  DateTime deadline;
+  DateTime creation_date;
+
+  HomeItemPhotoResponse({required this.nom, required this.pourcentage,required this.deadline,required this.creation_date});
+
+
   factory HomeItemPhotoResponse.fromJson(Map<String, dynamic> json) =>
       _$HomeItemPhotoResponseFromJson(json);
 
