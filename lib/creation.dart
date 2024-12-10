@@ -65,19 +65,44 @@ class _CreationState extends State<Creation> {
                 ElevatedButton(
                   onPressed: () async {
                     User? user = FirebaseAuth.instance.currentUser;
-                    HomeItemPhotoResponse t = HomeItemPhotoResponse(nom: _taskName.text, pourcentage: 0, deadline: _selectedDate, creation_date: DateTime.now());
 
-                    CollectionReference taskColl = FirebaseFirestore.instance
+                    CollectionReference<HomeItemPhotoResponse> taskColl = FirebaseFirestore.instance
                         .collection("users")
                         .doc(user!.uid)
                         .collection('tasks')
-                       .withConverter<HomeItemPhotoResponse>(
+                        .withConverter<HomeItemPhotoResponse>(
                       fromFirestore:(snapshot, _) => HomeItemPhotoResponse.fromJson(snapshot.data()!),
                       toFirestore: (task,_) => task.toJson(),
                     );
+
+                    QuerySnapshot<HomeItemPhotoResponse> querySnapshot = await taskColl
+                        .where('name', isEqualTo: _taskName.text)
+                        .get();
+
+
+
+                    if(_taskName.text.trim() == ""){
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(content: Text("Le nom ne doit pas être vide!")));
+                    }
+                    else if (_selectedDate.isBefore(DateTime.now())){
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(content: Text("Date Invalide")));
+                    }
+                    else if (querySnapshot.docs.isNotEmpty){
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(const SnackBar(content: Text("Nom de tache déja prit!")));
+                    }
+                    else{
+
+                    User? user = FirebaseAuth.instance.currentUser;
+                    HomeItemPhotoResponse t = HomeItemPhotoResponse(nom: _taskName.text, pourcentage: 0, deadline: _selectedDate, creation_date: DateTime.now());
+
                     taskColl.add(t);
+                    }
 
                   },
+
                   child: Text(S.current.create_task_button),
                 )
               ],

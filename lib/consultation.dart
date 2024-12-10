@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tp1/drawer.dart';
@@ -10,12 +13,12 @@ import 'package:tp1/transfer.dart';
 import 'generated/l10n.dart';
 
 class Consultation extends StatefulWidget {
-  final int taskID;
+  final String nomTache;
 
   @override
   _ConsultationState createState() => _ConsultationState();
 
-  Consultation({required this.taskID});
+  Consultation({required this.nomTache});
 }
 
 class _ConsultationState extends State<Consultation> with WidgetsBindingObserver {
@@ -26,18 +29,31 @@ class _ConsultationState extends State<Consultation> with WidgetsBindingObserver
   final _completion = TextEditingController();
   String imageUrl = "";
 
-  TaskDetailPhotoResponse t = TaskDetailPhotoResponse();
+  var t;
 
   void getInfos() async {
     try {
-      t = await taskDetails(widget.taskID);
-      _pourcentage.text = '${t.percentageDone}';
-      _nom.text = t.name;
+      User? user = FirebaseAuth.instance.currentUser;
+      DocumentReference<HomeItemPhotoResponse> taskColl = FirebaseFirestore.instance
+          .collection("users")
+          .doc(user!.uid)
+          .collection('tasks')
+          .doc(widget.nomTache.toString())
+          .withConverter<HomeItemPhotoResponse>(
+        fromFirestore:(snapshot, _) => HomeItemPhotoResponse.fromJson(snapshot.data()!),
+        toFirestore: (task,_) => task.toJson(),
+      );
+      DocumentSnapshot<HomeItemPhotoResponse> docSnapshot = await taskColl.get();
+      t = docSnapshot.data();
+      // taskColl.add(t);
+      // t = await taskDetails(widget.taskID);
+      _pourcentage.text = '${t!.pourcentage}';
+      _nom.text = t.nom;
       _date.text = t.deadline.toString();
-      _completion.text = t.percentageTimeSpent.toString().split(" ")[0] + "%";
-      if (t.photoId != 0) {
-        imageUrl = SingletonDio.image + t.photoId.toString();
-      }
+      _completion.text = t.pourcentage.toString() + "%";
+      // if (t.photoId != 0) {
+      //   imageUrl = SingletonDio.image + t.photoId.toString();
+      // }
       _isLoading = false;
       setState(() {});
     } catch (e) {
@@ -66,17 +82,44 @@ class _ConsultationState extends State<Consultation> with WidgetsBindingObserver
     var pickedImage = await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       imageUrl = await sendImage(pickedImage.path, pickedImage.name, t.id);
+      File f = File(pickedImage.path);
+
+      DocumentReference imageDoc = await FirebaseFirestore.instance.collection("images").add({
+        'url':''
+      });
+
+      Reference image = FirebaseStorage.instance.ref(imageDoc.id+'.jpg');
+      await image.putFile(f);
+      var url = await image.getDownloadURL();
+      User? user = FirebaseAuth.instance.currentUser;
+
+      DocumentReference task = FirebaseFirestore.instance
+          .collection("users")
+          .doc(user!.uid)
+          .collection('tasks')
+          .doc(widget.nomTache.toString());
+
+      t.photo = url;
+
+      task.update(t);
+
+
+
+
     }
     setState(() {});
   }
 
   void delete() async {
-    try {
-      await removeTask(t.id);
-      Navigator.popAndPushNamed(context, "/acceuil");
-    } catch (e) {
-      print(e);
-    }
+    User? user = FirebaseAuth.instance.currentUser;
+
+    DocumentReference task = FirebaseFirestore.instance
+        .collection("users")
+        .doc(user!.uid)
+        .collection('tasks')
+        .doc(widget.nomTache.toString());
+
+    task.delete();
   }
 
   @override

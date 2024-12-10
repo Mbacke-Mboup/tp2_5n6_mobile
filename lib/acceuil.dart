@@ -126,7 +126,7 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
                     ],
                   ),
                   onTap: () {
-                    Navigator.pushNamed(context, "/consultation", arguments: t.data().nom);
+                    Navigator.pushNamed(context, "/consultation", arguments: t.id);
                   },
                 )).toList(),
 

@@ -59,6 +59,7 @@ class HomeItemPhotoResponse {
   int pourcentage = 0;
   DateTime deadline;
   DateTime creation_date;
+  String photo = "";
 
   HomeItemPhotoResponse({required this.nom, required this.pourcentage,required this.deadline,required this.creation_date});
 

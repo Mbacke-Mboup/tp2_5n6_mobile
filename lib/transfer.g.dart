@@ -54,7 +54,7 @@ HomeItemPhotoResponse _$HomeItemPhotoResponseFromJson(
       pourcentage: (json['pourcentage'] as num).toInt(),
       deadline: DateTime.parse(json['deadline'] as String),
       creation_date: DateTime.parse(json['creation_date'] as String),
-    );
+    )..photo = json['photo'] as String;
 
 Map<String, dynamic> _$HomeItemPhotoResponseToJson(
         HomeItemPhotoResponse instance) =>
@@ -63,6 +63,7 @@ Map<String, dynamic> _$HomeItemPhotoResponseToJson(
       'pourcentage': instance.pourcentage,
       'deadline': instance.deadline.toIso8601String(),
       'creation_date': instance.creation_date.toIso8601String(),
+      'photo': instance.photo,
     };
 
 TaskDetailPhotoResponse _$TaskDetailPhotoResponseFromJson(

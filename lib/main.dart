@@ -43,8 +43,8 @@ class MyApp extends StatelessWidget {
         "/acceuil": (context) => Accueil(),
         "/creation": (context) => Creation(),
         "/consultation": (context) {
-          final arg = ModalRoute.of(context)!.settings.arguments as int;
-          return Consultation(taskID : arg);
+          final arg = ModalRoute.of(context)!.settings.arguments as String;
+          return Consultation(nomTache : arg);
         }
       },
     );
