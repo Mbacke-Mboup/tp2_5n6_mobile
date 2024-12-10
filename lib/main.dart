@@ -8,6 +8,9 @@ import 'package:tp1/creation.dart';
 import 'package:tp1/firebase_options.dart';
 import 'package:tp1/inscription.dart';
 import 'generated/l10n.dart';
+const supabaseUrl = 'https://lbkdeipsriqjqyqppyag.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxia2RlaXBzcmlxanF5cXBweWFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4NzIwMzEsImV4cCI6MjA0OTQ0ODAzMX0.irgS5xANvGhTL3xKO6Hkn5lKSkQzEBnBgXHE6t2lHa4';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

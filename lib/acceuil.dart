@@ -115,7 +115,7 @@ class _AccueilState extends State<Accueil> with WidgetsBindingObserver {
                             child: Text(S.current.task_percentage + ' ${t.data().pourcentage}'),
                           ),
                           PopupMenuItem<String>(
-                            child: Text(S.current.time_spent_task + ' ${t.data().pourcentage}'),
+                            child: Text(S.current.time_spent_task + ' ${t.data().deadline.difference(t.data().creation_date).inDays}'),
                           ),
                           PopupMenuItem<String>(
                             child: Text(S.current.deadline_task + ' ${t.data().creation_date}'),
