@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tp1/lib_http.dart';
 import 'package:tp1/transfer.dart';
@@ -24,24 +26,41 @@ class _ConnexionState extends State<Connexion> {
   @override
   void initState() {
     super.initState();
+    FirebaseAuth.instance
+        .authStateChanges()
+        .listen((User? user) async {
+      if(user == null){
+        setState(() {
+          _isLoading = false;
+        });
+      }else{
+        setState(() {
+          Navigator.popAndPushNamed(context, "/acceuil");
+        });
+      }
+    });
     SharedPreferences.getInstance().then((onValue) {
       _prefs = onValue;
       _getUser();
     });
   }
 
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleuser = await GoogleSignIn().signIn();
+
+    final GoogleSignInAuthentication? googleAuth = await googleuser?.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken:  googleAuth?.idToken
+    );
+
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
   _getUser() async {
-    SigninRequest req = SigninRequest();
-    req.username = _prefs.getString('name') ?? '';
-    req.password = _prefs.getString('password') ?? '';
-    if (req.username == '' && req.password == '') {
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-    await signin(req);
-    Navigator.popAndPushNamed(context, "/acceuil");
+
+
   }
 
   _setUser(SigninRequest req) {
@@ -89,30 +108,15 @@ class _ConnexionState extends State<Connexion> {
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          setState(() {
-                            _isLoading = true;
-                          });
-                          SigninRequest req = SigninRequest();
-                          req.username = _name.text;
-                          req.password = _motdePasse.text;
-                          await signin(req);
-                          _setUser(req);
-                          Navigator.popAndPushNamed(context, "/acceuil");
-                        } on DioException catch (e) {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                          String message = e.response!.data;
-                          if (message == "BadCredentialsException") {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(S.current.invalid_credentials)),
-                            );
-                          } else if (message == "InternalAuthenticationServiceException") {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(S.current.account_not_exist)),
-                            );
-                          } else {
-                            print(e);
+                          final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                              email: _name.text,
+                              password: _motdePasse.text
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'user-not-found') {
+                            print('No user found for that email.');
+                          } else if (e.code == 'wrong-password') {
+                            print('Wrong password provided for that user.');
                           }
                         }
                       },
@@ -124,6 +128,17 @@ class _ConnexionState extends State<Connexion> {
                       },
                       child: Text(S.current.signup_button),
                     ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(onPressed: ()  {
+                      signInWithGoogle();
+                      if(FirebaseAuth.instance.currentUser != null){
+                        Navigator.popAndPushNamed(context, "/acceuil");
+                      }
+                    }, child: Text("Connexion avec Google"))
                   ],
                 )
               ],

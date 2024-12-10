@@ -1,10 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tp1/lib_http.dart';
 import 'package:tp1/generated/l10n.dart';
 
 class TNav extends StatelessWidget {
-  static String name = "";
+  static String? name = FirebaseAuth.instance.currentUser!= null ? FirebaseAuth.instance.currentUser?.email : "";
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +14,6 @@ class TNav extends StatelessWidget {
       child: FutureBuilder<SharedPreferences>(
         future: SharedPreferences.getInstance(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            name = snapshot.data?.getString('name') ?? '';
 
             return ListView(
               padding: EdgeInsets.zero,
@@ -49,15 +49,17 @@ class TNav extends StatelessWidget {
                 ListTile(
                   leading: Icon(Icons.door_back_door),
                   title: Text(S.current.logout),
-                  onTap: () {
+                  onTap: () async {
                     SharedPreferences.getInstance().then((onValue) {
                       onValue.remove('name');
                       onValue.remove('password');
                     });
+                    await GoogleSignIn().signOut();
+                    await FirebaseAuth.instance.signOut();
+
 
                     try {
                       signout();
-                      name = "";
                       Navigator.pushReplacementNamed(context, "/");
                     } catch (e) {
                       print(e);
@@ -66,10 +68,7 @@ class TNav extends StatelessWidget {
                 ),
               ],
             );
-          } else {
-            return Center(child: CircularProgressIndicator());
           }
-        },
       ),
     );
   }

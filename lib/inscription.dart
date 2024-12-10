@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tp1/lib_http.dart';
 import 'package:tp1/transfer.dart';
@@ -31,6 +33,19 @@ class _InscriptionState extends State<Inscription> {
   _setUser(SignupRequest req) {
     _prefs.setString('name', req.username);
     _prefs.setString('password', req.password);
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleuser = await GoogleSignIn().signIn();
+
+    final GoogleSignInAuthentication? googleAuth = await googleuser?.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken:  googleAuth?.idToken
+    );
+
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   @override
@@ -76,49 +91,30 @@ class _InscriptionState extends State<Inscription> {
             Center(
               child: ElevatedButton(
                 onPressed: () async {
-                  if (_confirmMotdePasse.text != _motdePasse.text) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(S.current.passwords_do_not_match)),
+                  try {
+                    final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      email: _name.text,
+                      password: _motdePasse.text,
                     );
-                  } else {
-                    try {
-                      setState(() {
-                        _isLoading = true;
-                      });
-                      SignupRequest req = SignupRequest();
-                      req.username = _name.text;
-                      req.password = _motdePasse.text;
-                      await signup(req);
-                      _setUser(req);
-                      Navigator.pushNamed(context, "/acceuil");
-                    } on DioException catch (e) {
-                      setState(() {
-                        _isLoading = false;
-                      });
-                      String message = e.response!.data;
-                      if (message == "UsernameTooShort") {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.current.username_too_short)),
-                        );
-                      } else if (message == "PasswordTooShort") {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.current.password_too_short)),
-                        );
-                      } else if (message == "UsernameAlreadyTaken") {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.current.username_already_taken)),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(S.current.network_error)),
-                        );
-                      }
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'weak-password') {
+                      print('The password provided is too weak.');
+                    } else if (e.code == 'email-already-in-use') {
+                      print('The account already exists for that email.');
                     }
+                  } catch (e) {
+                    print(e);
                   }
                 },
                 child: Text(S.current.signup_button),
               ),
             ),
+            ElevatedButton(onPressed: ()  {
+              signInWithGoogle();
+              if(FirebaseAuth.instance.currentUser != null){
+                Navigator.popAndPushNamed(context, "/acceuil");
+              }
+            }, child: Text("Connexion avec Google"))
           ],
         ),
       ),
